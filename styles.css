@@ -15,12 +15,12 @@ body {
   width: 90%;
   max-width: 800px;
   text-align: center;
-  border-radius: 10px; /* No outline */
+  border-radius: 10px; 
   overflow: hidden;
   box-sizing: border-box;
-  background-color: #181818; /* Unified background behind playlist */
+  background-color: #181818; 
   display: flex;
-  flex-direction: column; /* Stack header & playlist vertically */
+  flex-direction: column; 
 }
 
 /* ===== HEADER ===== */
@@ -54,12 +54,12 @@ body {
   flex-direction: column;
   justify-content: center;
   text-align: left;
-  padding-left: 10px; /* Shift text to the left */
+  padding-left: 10px; 
   color: #fff;
 }
 
 .now-playing-text {
-  font-size: 0.8rem; /* Smaller text */
+  font-size: 0.8rem;
   font-weight: bold;
   margin: 0;
   opacity: 0.85;
@@ -129,7 +129,7 @@ body {
 /* Slider tooltip */
 #slider-tooltip {
   position: absolute;
-  bottom: 25px; /* Just above the slider */
+  bottom: 25px; 
   left: 50%;
   transform: translateX(-50%);
   background: #4DAB9A;
@@ -137,7 +137,7 @@ body {
   padding: 3px 6px;
   border-radius: 3px;
   font-size: 0.8rem;
-  display: none; /* Hidden by default */
+  display: none; 
   pointer-events: none;
   white-space: nowrap;
   transition: opacity 0.1s;
@@ -167,7 +167,7 @@ body {
   padding: 10px;
   border-radius: 5px; 
   transition: background 0.3s, transform 0.3s;
-  position: relative; /* for overlay */
+  position: relative;
 }
 
 .track:hover {
@@ -175,7 +175,6 @@ body {
   transform: scale(1.03);
 }
 
-/* Thumbnails: half-size (40x40), corners */
 .track img {
   width: 40px;
   height: 40px;
@@ -224,22 +223,22 @@ body {
   visibility: hidden;
 }
 
-/* ===== MODAL FOR MANAGING API KEY & PLAYLISTS ===== */
+/* ===== MODAL ===== */
 #manage-modal {
-  position: fixed;         /* Stays in same place even if page scrolls */
+  position: fixed;       
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: none;           /* Hidden by default; show via JS */
+  display: none;         
   justify-content: center; 
   align-items: center;     
-  background: rgba(0, 0, 0, 0.6); /* Semi-transparent black overlay */
+  background: rgba(0, 0, 0, 0.6);
   z-index: 9999;           
 }
 
 #manage-modal-content {
-  background: #333;        /* Dark background */
+  background: #333;       
   color: #fff;
   padding: 20px;
   border-radius: 8px;
