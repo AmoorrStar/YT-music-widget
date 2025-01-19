@@ -1,45 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Custom YouTube Playlist Widget</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>Custom YouTube Widget with LocalStorage</title>
 </head>
 <body>
   <div id="widget-container">
-    <!-- Header Section -->
-    <div id="now-playing">
-      <img src="" alt="Thumbnail" />
-      <div class="center-info">
-        <p class="now-playing-text">
-          Playing Now • <span id="total-duration">0:00</span>
-        </p>
-        <p class="song-title">Song Title</p>
-      </div>
+    <!-- Buttons to manage data -->
+    <button id="manage-api-button">Manage API Key & Playlists</button>
+    <button id="change-playlist-button">Switch Playlist</button>
 
-      <div class="controls">
-        <button id="switch-playlist-button" title="Switch Playlist">Switch</button>
-        <button id="loop-button" title="Loop (Off)">↻</button>
-        <button id="shuffle-button" title="Shuffle">⇄</button>
-        <button id="prev-button" title="Previous Song">|≪</button>
-        <button id="play-pause-button" title="Play/Pause">▷</button>
-        <button id="next-button" title="Next Song">≫|</button>
+    <!-- The widget will appear here -->
+    <div id="playlist-widget"></div>
+  </div>
+  
+  <!-- Modal to manage user data (API key & playlists) -->
+  <div id="manage-modal" style="display:none;">
+    <div style="background: #333; color: #fff; padding: 20px; border-radius: 8px;">
+      <h2>Manage Your API & Playlists</h2>
+      <div>
+        <label for="apiKeyInput">API Key:</label>
+        <input type="text" id="apiKeyInput" style="width: 300px;" />
       </div>
-
-      <input type="range" id="progress-bar" value="0" min="0" max="100" />
-      <div id="slider-tooltip">0:00</div>
+      <div style="margin-top: 10px;">
+        <label for="playlistInput">Add Playlist ID:</label>
+        <input type="text" id="playlistInput" />
+        <button id="addPlaylistBtn">Add</button>
+      </div>
+      <ul id="playlistsList" style="margin-top: 10px; list-style: none; padding-left: 0;"></ul>
+      <button id="saveChangesBtn" style="margin-top: 10px;">Save & Close</button>
     </div>
-
-    <!-- Playlist Container -->
-    <div id="playlist"></div>
-
-    <!-- Hidden YouTube Player -->
-    <div id="player"></div>
   </div>
 
-  <!-- Google API script must load BEFORE script.js -->
-  <script src="https://apis.google.com/js/api.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
