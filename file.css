@@ -1,0 +1,218 @@
+/* ===== BODY & CONTAINER ===== */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #202020;
+  color: #4DAB9A;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden; /* Hide the main page scroll bar */
+}
+
+#widget-container {
+  width: 90%;
+  max-width: 800px;
+  text-align: center;
+  /* Removed any outline border */
+  border-radius: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: #181818; /* Unified background behind playlist */
+  display: flex;
+  flex-direction: column; /* Stack the header & playlist vertically */
+}
+
+/* ===== HEADER ===== */
+#now-playing {
+  position: relative; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 10px;
+  background: #333;
+  color: #4DAB9A;
+  z-index: 1;
+  min-height: 90px;
+  box-sizing: border-box;
+}
+
+#now-playing img {
+  width: 70px; 
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.center-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  padding-left: 10px; /* Shift text to the left */
+  color: #fff;
+}
+.now-playing-text {
+  font-size: 0.8rem; /* Smaller text */
+  font-weight: bold;
+  margin: 0;
+  opacity: 0.85;
+}
+.song-title {
+  font-size: 1.1rem;
+  margin: 3px 0 0 0;
+}
+
+/* ===== CONTROLS ===== */
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.controls button {
+  background: #4DAB9A;
+  color: #202020;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+.controls button:hover {
+  background-color: #3A8A73;
+}
+
+/* ===== SLIDER ===== */
+#progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0; 
+  right: 0;
+  appearance: none;
+  background: #202020;
+  height: 5px;
+  outline: none;
+  border-radius: 5px;
+  margin: 0;
+}
+#progress-bar::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  background: #4DAB9A;
+  border-radius: 50%;
+  cursor: pointer;
+}
+#progress-bar::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  background: #4DAB9A;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Slider tooltip */
+#slider-tooltip {
+  position: absolute;
+  bottom: 25px; /* Just above the slider */
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4DAB9A;
+  color: #202020;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  display: none; /* Hidden by default */
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.1s;
+}
+
+/* ===== PLAYLIST ===== */
+#playlist {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  max-height: 420px;
+  padding: 20px 10px 10px; /* Some top padding */
+  box-sizing: border-box;
+}
+#playlist::-webkit-scrollbar {
+  display: none;
+}
+
+/* Each track: half-size images + fun hover effects */
+.track {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 5px; 
+  transition: background 0.3s, transform 0.3s;
+  position: relative; /* For hover overlay */
+}
+.track:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.03);
+}
+
+/* Square images, object-fit cover */
+.track img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Black overlay on hover, with a play icon */
+.track:hover::before {
+  content: "";
+  position: absolute;
+  top: 10px; 
+  left: 10px; 
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  z-index: 2;
+}
+.track:hover::after {
+  content: "▷";
+  position: absolute;
+  top: 10px; 
+  left: 10px;
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.track p {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+
+#player {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
