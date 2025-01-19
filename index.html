@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Custom YouTube Playlist Widget</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="widget-container">
+    <!-- Header Section -->
+    <div id="now-playing">
+      <img src="" alt="Thumbnail" />
+      <div class="center-info">
+        <p class="now-playing-text">
+          Playing Now • <span id="total-duration">0:00</span>
+        </p>
+        <p class="song-title">Song Title</p>
+      </div>
+
+      <div class="controls">
+        <button id="switch-playlist-button" title="Switch Playlist">Switch</button>
+        <button id="loop-button" title="Loop (Off)">↻</button>
+        <button id="shuffle-button" title="Shuffle">⇄</button>
+        <button id="prev-button" title="Previous Song">|≪</button>
+        <button id="play-pause-button" title="Play/Pause">▷</button>
+        <button id="next-button" title="Next Song">≫|</button>
+      </div>
+
+      <input type="range" id="progress-bar" value="0" min="0" max="100" />
+      <div id="slider-tooltip">0:00</div>
+    </div>
+
+    <!-- Playlist Container -->
+    <div id="playlist"></div>
+
+    <!-- Hidden YouTube Player -->
+    <div id="player"></div>
+  </div>
+
+  <!-- Google API script must load BEFORE script.js -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
