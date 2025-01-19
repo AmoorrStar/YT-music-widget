@@ -1,32 +1,61 @@
 /************************************
- * Storage Keys
+ * LocalStorage Keys
  ************************************/
 const STORAGE_KEY = "youtubeWidgetData"; 
-/* We'll store an object { apiKey: string, playlists: string[] } in localStorage. */
+/*
+We'll store an object { apiKey: string, playlists: string[] }
+in localStorage.
+*/
 
 let userData = {
   apiKey: "",
   playlists: [],
 };
-let currentIndex = 0;         // Which playlist we're using
+let currentIndex = 0;  // Current playlist index
+let videos = [];
 let isLooping = false;
 let isFading = false;
 let fadeInterval;
-let player;
+
+let player; // YT Player instance
 
 /************************************
- * onload=initGoogleAPI calls this 
- * AFTER gapi is defined.
+ * 1) Google API script calls initGoogleAPI() AFTER
+ *    api.js is loaded. => gapi is defined by then.
  ************************************/
-function loadYouTubeAPI() {
-  console.log("loadYouTubeAPI called - gapi is now defined.");
-  loadUserData();       // localStorage retrieval
-  initUI();             // manage modal UI
-  initWidget();         // build the widget
-}
+window.initGoogleAPI = function initGoogleAPI() {
+  console.log("initGoogleAPI: gapi should be available now!");
+  // Now we can safely load the user data and UI
+  loadUserData();
+  // Wait for the DOM to be ready to bind UI elements
+  document.addEventListener("DOMContentLoaded", () => {
+    initUI(); 
+    initWidget();
+  });
+};
 
 /************************************
- * Load & Save Data to localStorage
+ * 2) onYouTubeIframeAPIReady() => create YT player
+ ************************************/
+window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
+  console.log("onYouTubeIframeAPIReady => creating YT player");
+  player = new YT.Player("player", {
+    height: "0",
+    width: "0",
+    videoId: "",
+    playerVars: { controls: 0 },
+    events: {
+      onReady: () => {
+        console.log("YT Player ready");
+        player.setVolume(100);
+      },
+      onStateChange: onPlayerStateChange,
+    },
+  });
+};
+
+/************************************
+ * Load & Save in localStorage
  ************************************/
 function loadUserData() {
   const rawData = localStorage.getItem(STORAGE_KEY);
@@ -34,7 +63,7 @@ function loadUserData() {
     try {
       userData = JSON.parse(rawData);
     } catch (e) {
-      console.error("Failed to parse local storage data", e);
+      console.error("Failed to parse local storage data:", e);
     }
   }
 }
@@ -44,23 +73,23 @@ function saveUserData() {
 }
 
 /************************************
- * UI for Manage button & modal
+ * UI for manage modal
  ************************************/
 function initUI() {
-  const manageBtn = document.getElementById("manage-api-button");
   const manageModal = document.getElementById("manage-modal");
+  const manageApiButton = document.getElementById("manage-api-button");
   const apiKeyInput = document.getElementById("apiKeyInput");
   const playlistInput = document.getElementById("playlistInput");
   const addPlaylistBtn = document.getElementById("addPlaylistBtn");
   const playlistsList = document.getElementById("playlistsList");
   const saveChangesBtn = document.getElementById("saveChangesBtn");
 
-  // Open modal if no API key yet
+  // If no API key, show modal right away
   if (!userData.apiKey) {
     manageModal.style.display = "flex";
   }
 
-  manageBtn.addEventListener("click", () => {
+  manageApiButton.addEventListener("click", () => {
     apiKeyInput.value = userData.apiKey || "";
     renderPlaylistsList();
     manageModal.style.display = "flex";
@@ -92,25 +121,23 @@ function initUI() {
 }
 
 /************************************
- * initWidget: Setup or re-setup
- * the YouTube Data API calls
+ * initWidget => sets up the gapi client 
+ * with the user's API key, fetches playlist
  ************************************/
 function initWidget() {
-  console.log("INIT WIDGET with key:", userData.apiKey);
-
+  console.log("initWidget => using userData:", userData);
   if (!userData.apiKey) {
-    console.warn("No API key provided. Widget won't fetch data.");
+    console.warn("No API key found; not calling gapi client.");
     return;
   }
 
-  // Load gapi client with the user's key
   gapi.client
     .init({ apiKey: userData.apiKey })
     .then(() => {
-      // If no playlists stored, do nothing
-      if (userData.playlists.length === 0) return;
-
-      // Attempt to fetch the first playlist
+      if (!userData.playlists.length) {
+        console.warn("No playlists in userData.");
+        return;
+      }
       fetchPlaylistVideos(userData.playlists[currentIndex]);
     })
     .catch((err) => {
@@ -119,19 +146,17 @@ function initWidget() {
 }
 
 /************************************
- * Reload widget after user changes data
+ * reloadWidget => re-run initWidget 
+ * after user changes data
  ************************************/
 function reloadWidget() {
-  console.log("Reloading widget with new data...");
-  // Reset the player? Optionally tear down old references
+  console.log("reloadWidget => re-initialize with new data");
   initWidget();
 }
 
 /************************************
- * fetchPlaylistVideos using gapi
+ * fetchPlaylistVideos => uses gapi to get videos
  ************************************/
-let videos = [];
-
 function fetchPlaylistVideos(playlistId) {
   gapi.client
     .request({
@@ -146,12 +171,11 @@ function fetchPlaylistVideos(playlistId) {
       videos = res.result.items || [];
       currentIndex = 0;
       displayPlaylist(videos);
-      if (videos.length > 0) {
+      if (videos.length) {
         const first = videos[0];
         const vid = first.snippet.resourceId.videoId;
         const title = first.snippet.title;
-        const thumbnail =
-          (first.snippet.thumbnails && first.snippet.thumbnails.medium) ? first.snippet.thumbnails.medium.url : "";
+        const thumbnail = (first.snippet.thumbnails?.medium || {}).url || "";
         playVideo(vid, title, thumbnail);
       }
     })
@@ -161,58 +185,81 @@ function fetchPlaylistVideos(playlistId) {
 }
 
 /************************************
- * displayPlaylist in #playlist
+ * displayPlaylist => fill #playlist
  ************************************/
 function displayPlaylist(videoList) {
-  const playlistContainer = document.getElementById("playlist");
-  playlistContainer.innerHTML = "";
+  const playlistDiv = document.getElementById("playlist");
+  playlistDiv.innerHTML = "";
 
-  videoList.forEach((video, i) => {
-    const videoId = video.snippet.resourceId.videoId;
-    const title = video.snippet.title;
-    const thumbnail =
-      (video.snippet.thumbnails && video.snippet.thumbnails.medium)
-        ? video.snippet.thumbnails.medium.url
-        : "";
+  videoList.forEach((v, i) => {
+    const videoId = v.snippet.resourceId.videoId;
+    const title = v.snippet.title;
+    const thumb = (v.snippet.thumbnails?.medium || {}).url || "";
 
-    const trackElement = document.createElement("div");
-    trackElement.className = "track";
-    trackElement.innerHTML = `
-      <img src="${thumbnail}" alt="${title}" />
+    const trackEl = document.createElement("div");
+    trackEl.className = "track";
+    trackEl.innerHTML = `
+      <img src="${thumb}" alt="${title}" />
       <p>${title}</p>
     `;
 
-    trackElement.addEventListener("click", () => {
+    trackEl.addEventListener("click", () => {
       currentIndex = i;
-      playVideo(videoId, title, thumbnail);
+      playVideo(videoId, title, thumb);
     });
 
-    playlistContainer.appendChild(trackElement);
+    playlistDiv.appendChild(trackEl);
   });
 }
 
 /************************************
- * Initialize the YouTube IFrame Player
+ * onPlayerStateChange => handle loop & progress
  ************************************/
-function onYouTubeIframeAPIReady() {
-  console.log("IFrame API ready - creating player");
-  player = new YT.Player("player", {
-    height: "0",
-    width: "0",
-    videoId: "",
-    playerVars: { controls: 0 },
-    events: {
-      onReady: () => {
-        console.log("YT Player ready");
-        player.setVolume(100);
-      },
-      onStateChange: onPlayerStateChange,
-    },
-  });
+function onPlayerStateChange(e) {
+  if (!player) return;
+  // Update total duration
+  const totalDurationEl = document.getElementById("total-duration");
+  if (totalDurationEl) {
+    const d = player.getDuration() || 0;
+    const mins = Math.floor(d / 60);
+    const secs = Math.floor(d % 60).toString().padStart(2, "0");
+    totalDurationEl.textContent = `${mins}:${secs}`;
+  }
+
+  // If loop ON and track ended => replay
+  if (e.data === YT.PlayerState.ENDED && isLooping) {
+    player.setVolume(0);
+    player.playVideo();
+    fadeVolume(100, 1000);
+  }
+
+  // Continuously update progress
+  if (e.data === YT.PlayerState.PLAYING) {
+    const progressBar = document.getElementById("progress-bar");
+    const updateInterval = setInterval(() => {
+      if (!progressBar || player.getPlayerState() !== YT.PlayerState.PLAYING) {
+        clearInterval(updateInterval);
+        return;
+      }
+      const currentTime = player.getCurrentTime() || 0;
+      const duration = player.getDuration() || 1;
+      const progressPercent = (currentTime / duration) * 100;
+      progressBar.value = progressPercent.toString();
+
+      // Fill from 0% -> progressPercent with dark green
+      progressBar.style.background = `
+        linear-gradient(to right,
+          #2D5F55 0%,
+          #2D5F55 ${progressPercent}%,
+          #202020 ${progressPercent}%,
+          #202020 100%)
+      `;
+    }, 500);
+  }
 }
 
 /************************************
- * PLAY a selected video
+ * playVideo => updates header & loads video in YT player
  ************************************/
 function playVideo(videoId, title, thumbnail) {
   const nowPlaying = document.getElementById("now-playing");
@@ -236,10 +283,9 @@ function playVideo(videoId, title, thumbnail) {
     <div id="slider-tooltip">0:00</div>
   `;
 
-  // Re-init UI for manage modal
+  // Re-bind the controls
   initUIControls();
 
-  // If player is ready, load the new video
   if (player && typeof player.loadVideoById === "function") {
     player.setVolume(100);
     player.loadVideoById(videoId);
@@ -247,21 +293,21 @@ function playVideo(videoId, title, thumbnail) {
 }
 
 function initUIControls() {
-  // Re-bind controls
+  // Manage Data
   const manageBtn = document.getElementById("manage-api-button");
+  manageBtn.addEventListener("click", () => {
+    document.getElementById("apiKeyInput").value = userData.apiKey || "";
+    renderPlaylistsInModal();
+    document.getElementById("manage-modal").style.display = "flex";
+  });
+
+  // Loop, Shuffle, Prev, Next, etc.
   const loopBtn = document.getElementById("loop-button");
   const shuffleBtn = document.getElementById("shuffle-button");
   const prevBtn = document.getElementById("prev-button");
   const playPauseBtn = document.getElementById("play-pause-button");
   const nextBtn = document.getElementById("next-button");
-
-  manageBtn.addEventListener("click", () => {
-    const modal = document.getElementById("manage-modal");
-    modal.style.display = "flex";
-    // Populate fields, etc. from userData
-    document.getElementById("apiKeyInput").value = userData.apiKey || "";
-    renderPlaylistListInModal();
-  });
+  const progressBar = document.getElementById("progress-bar");
 
   loopBtn.addEventListener("click", toggleLoop);
   shuffleBtn.addEventListener("click", shufflePlaylist);
@@ -269,24 +315,24 @@ function initUIControls() {
   playPauseBtn.addEventListener("click", togglePlayPause);
   nextBtn.addEventListener("click", playNextSong);
 
-  const progressBar = document.getElementById("progress-bar");
   progressBar.addEventListener("input", seekVideo);
   progressBar.addEventListener("mousemove", showSliderTooltip);
   progressBar.addEventListener("mouseleave", hideSliderTooltip);
 }
 
-function renderPlaylistListInModal() {
-  const playlistsList = document.getElementById("playlistsList");
-  playlistsList.innerHTML = "";
+/* re-render the playlists in the modal (like manage playlists) */
+function renderPlaylistsInModal() {
+  const ul = document.getElementById("playlistsList");
+  ul.innerHTML = "";
   userData.playlists.forEach((pl, i) => {
     const li = document.createElement("li");
     li.textContent = `(${i}) ${pl}`;
-    playlistsList.appendChild(li);
+    ul.appendChild(li);
   });
 }
 
 /************************************
- * LOOP, SHUFFLE, PLAY/PAUSE, etc.
+ * Loop, Shuffle, Next/Prev
  ************************************/
 function toggleLoop() {
   isLooping = !isLooping;
@@ -302,6 +348,63 @@ function shufflePlaylist() {
   displayPlaylist(videos);
 }
 
+function playNextSong() {
+  currentIndex = (currentIndex + 1) % videos.length;
+  const vid = videos[currentIndex]?.snippet?.resourceId?.videoId;
+  const title = videos[currentIndex]?.snippet?.title;
+  const thumb = (videos[currentIndex]?.snippet?.thumbnails?.medium || {}).url || "";
+  if (vid) playVideo(vid, title, thumb);
+}
+
+function playPreviousSong() {
+  currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+  const vid = videos[currentIndex]?.snippet?.resourceId?.videoId;
+  const title = videos[currentIndex]?.snippet?.title;
+  const thumb = (videos[currentIndex]?.snippet?.thumbnails?.medium || {}).url || "";
+  if (vid) playVideo(vid, title, thumb);
+}
+
+/************************************
+ * Fade Volume
+ ************************************/
+function fadeVolume(targetVolume, fadeTime = 1000) {
+  if (!player) return;
+  clearInterval(fadeInterval);
+  isFading = true;
+
+  let steps = 20;
+  let stepTime = fadeTime / steps;
+  let currentVolume = player.getVolume();
+  let volumeStep = (targetVolume - currentVolume) / steps;
+
+  fadeInterval = setInterval(() => {
+    currentVolume += volumeStep;
+    if (currentVolume < 0) currentVolume = 0;
+    if (currentVolume > 100) currentVolume = 100;
+    player.setVolume(currentVolume);
+
+    // If we reached/passed targetVolume
+    if (
+      (volumeStep > 0 && currentVolume >= targetVolume) ||
+      (volumeStep < 0 && currentVolume <= targetVolume)
+    ) {
+      clearInterval(fadeInterval);
+      isFading = false;
+      player.setVolume(targetVolume);
+      if (targetVolume === 0) {
+        // fade-out done
+        player.pauseVideo();
+      } else if (targetVolume === 100) {
+        // fade-in done
+        player.playVideo();
+      }
+    }
+  }, stepTime);
+}
+
+/************************************
+ * Toggle Play/Pause with fade
+ ************************************/
 function togglePlayPause() {
   if (!player) return;
   const playPauseBtn = document.getElementById("play-pause-button");
@@ -310,7 +413,10 @@ function togglePlayPause() {
   if (state === YT.PlayerState.PLAYING && !isFading) {
     fadeVolume(0, 1000);
     playPauseBtn.textContent = "▷";
-  } else if ((state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) && !isFading) {
+  } else if (
+    (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) &&
+    !isFading
+  ) {
     player.setVolume(0);
     player.playVideo();
     fadeVolume(100, 1000);
@@ -318,31 +424,11 @@ function togglePlayPause() {
   }
 }
 
-function playNextSong() {
-  currentIndex = (currentIndex + 1) % videos.length;
-  const nextVideo = videos[currentIndex];
-  if (!nextVideo) return;
-  const vid = nextVideo.snippet.resourceId.videoId;
-  const title = nextVideo.snippet.title;
-  const thumb = (nextVideo.snippet.thumbnails.medium || {}).url || "";
-  playVideo(vid, title, thumb);
-}
-
-function playPreviousSong() {
-  currentIndex = (currentIndex - 1 + videos.length) % videos.length;
-  const prevVideo = videos[currentIndex];
-  if (!prevVideo) return;
-  const vid = prevVideo.snippet.resourceId.videoId;
-  const title = prevVideo.snippet.title;
-  const thumb = (prevVideo.snippet.thumbnails.medium || {}).url || "";
-  playVideo(vid, title, thumb);
-}
-
 /************************************
- * Seeking & tooltip
+ * Seek & Tooltip
  ************************************/
-function seekVideo(event) {
-  const progressBar = event.target;
+function seekVideo() {
+  const progressBar = document.getElementById("progress-bar");
   const duration = player.getDuration() || 0;
   const seekTo = (progressBar.value / 100) * duration;
   player.seekTo(seekTo);
@@ -368,48 +454,4 @@ function showSliderTooltip(e) {
 function hideSliderTooltip() {
   const tooltip = document.getElementById("slider-tooltip");
   tooltip.style.display = "none";
-}
-
-/************************************
- * onPlayerStateChange 
- ************************************/
-function onPlayerStateChange(event) {
-  // Update total duration
-  const totalDurationEl = document.getElementById("total-duration");
-  if (totalDurationEl && player) {
-    const d = player.getDuration() || 0;
-    const mins = Math.floor(d / 60);
-    const secs = Math.floor(d % 60).toString().padStart(2, "0");
-    totalDurationEl.textContent = `${mins}:${secs}`;
-  }
-
-  // If loop ON and track ended => replay
-  if (event.data === YT.PlayerState.ENDED && isLooping) {
-    player.setVolume(0);
-    player.playVideo();
-    fadeVolume(100, 1000);
-  }
-
-  // Continuously update progress
-  if (event.data === YT.PlayerState.PLAYING) {
-    const progressBar = document.getElementById("progress-bar");
-    const updateInterval = setInterval(() => {
-      if (!progressBar || player.getPlayerState() !== YT.PlayerState.PLAYING) {
-        clearInterval(updateInterval);
-        return;
-      }
-      const currentTime = player.getCurrentTime() || 0;
-      const duration = player.getDuration() || 1;
-      const progressPercent = (currentTime / duration) * 100;
-
-      progressBar.value = progressPercent.toString();
-      progressBar.style.background = `
-        linear-gradient(to right,
-          #2D5F55 0%,
-          #2D5F55 ${progressPercent}%,
-          #202020 ${progressPercent}%,
-          #202020 100%)
-      `;
-    }, 500);
-  }
 }
