@@ -11,7 +11,9 @@
     <div id="now-playing">
       <img src="" alt="Thumbnail" />
       <div class="center-info">
-        <p class="now-playing-text">Playing Now • <span id="total-duration">0:00</span></p>
+        <p class="now-playing-text">
+          Playing Now • <span id="total-duration">0:00</span>
+        </p>
         <p class="song-title">Song Title</p>
       </div>
 
@@ -35,7 +37,7 @@
     <div id="player"></div>
   </div>
 
-  <!-- MODAL for managing API key & playlists -->
+  <!-- Modal for managing API key & playlists -->
   <div id="manage-modal">
     <div id="manage-modal-content">
       <h2>Manage Your API & Playlists</h2>
@@ -53,25 +55,13 @@
     </div>
   </div>
 
-  <!-- 1) Google API script with onload param -->
-  <script>
-    function initGoogleAPI() {
-      // We'll define loadYouTubeAPI() in script.js
-      // This is called once api.js is actually loaded
-      loadYouTubeAPI();
-    }
-  </script>
+  <!-- 1) Our main logic (defines initGoogleAPI, onYouTubeIframeAPIReady, etc.) -->
+  <script src="script.js"></script>
+
+  <!-- 2) Google API script, calls initGoogleAPI() once loaded -->
   <script src="https://apis.google.com/js/api.js?onload=initGoogleAPI"></script>
 
-  <!-- 2) The YouTube IFrame API (for onYouTubeIframeAPIReady) -->
-  <script>
-    const iframescript = document.createElement("script");
-    iframescript.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(iframescript);
-  </script>
-
-  <!-- 3) Our main logic -->
-  <script src="script.js"></script>
+  <!-- 3) YouTube IFrame API script, calls onYouTubeIframeAPIReady() once loaded -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
-
