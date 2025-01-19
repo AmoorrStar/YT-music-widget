@@ -158,7 +158,6 @@ body {
   display: none;
 }
 
-/* Each track: smaller images, fun hover effects */
 .track {
   display: flex;
   align-items: center;
@@ -176,7 +175,7 @@ body {
   transform: scale(1.03);
 }
 
-/* Thumbnails: half-size (40x40), square corners */
+/* Thumbnails: half-size (40x40), corners */
 .track img {
   width: 40px;
   height: 40px;
@@ -248,7 +247,6 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-/* Example: inputs, button styling inside the modal */
 #manage-modal-content h2 {
   margin-top: 0;
 }
