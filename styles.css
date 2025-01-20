@@ -40,7 +40,7 @@ body {
   z-index: 1;
   min-height: 90px;
   box-sizing: border-box;
-  flex-wrap: wrap; /* Make it responsive */
+  flex-wrap: wrap; /* Ensure wrapping on smaller screens */
 }
 
 #now-playing img {
@@ -61,6 +61,7 @@ body {
   text-align: left;
   padding-left: 10px;
   color: #fff;
+  width: 100%; /* Full width for wrapping */
 }
 
 .now-playing-text {
@@ -82,7 +83,10 @@ body {
   align-items: center;
   justify-content: flex-end;
   flex-shrink: 0;
-  flex-wrap: wrap; /* Wrap controls if needed */
+  flex-wrap: wrap; /* Wrap buttons on smaller widths */
+  justify-content: center; /* Center-align buttons */
+  width: 100%; /* Make controls span full width */
+  margin-top: 5px;
 }
 
 .controls button {
@@ -302,13 +306,7 @@ body {
   margin-top: 10px;
 }
 
-/* 
-   ===== Responsive adjustments =====
-   We already have a breakpoint at 500px.
-   Below we add an even narrower breakpoint
-   for small horizontal areas like in Notion,
-   shrinking the image and font sizes.
-*/
+/* ===== Responsive adjustments ===== */
 @media (max-width: 500px) {
   #now-playing {
     flex-wrap: wrap;
@@ -319,7 +317,6 @@ body {
     margin-bottom: 8px;
   }
   .center-info {
-    padding-left: 10px;
     text-align: left;
     width: 100%;
     margin: 8px 0;
@@ -327,11 +324,10 @@ body {
   .controls {
     width: 100%;
     justify-content: center;
-    margin-top: auto;
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: 300px) {
   #now-playing img {
     width: 50px;
     height: 50px;
@@ -341,5 +337,9 @@ body {
   }
   .now-playing-text {
     font-size: 0.55rem;
+  }
+  .controls button {
+    padding: 3px 6px;
+    font-size: 0.9rem;
   }
 }
