@@ -32,15 +32,13 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 15px;
+  gap: 15px; /* Space between the image and the text */
   padding: 10px;
   background: #333;
   color: #4DAB9A;
   z-index: 1;
   min-height: 90px;
   box-sizing: border-box;
-  flex-wrap: wrap; /* Ensure wrapping on smaller screens */
 }
 
 #now-playing img {
@@ -49,19 +47,14 @@ body {
   object-fit: cover;
   border-radius: 8px;
   flex-shrink: 0;
-  margin: 0;
-  padding: 0;
 }
 
 .center-info {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  text-align: left;
-  padding-left: 10px;
+  text-align: left; /* Align text to the left */
   color: #fff;
-  width: 100%; /* Full width for wrapping */
 }
 
 .now-playing-text {
@@ -81,12 +74,9 @@ body {
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  flex-wrap: wrap; /* Wrap buttons on smaller widths */
-  justify-content: center; /* Center-align buttons */
-  width: 100%; /* Make controls span full width */
-  margin-top: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .controls button {
@@ -313,33 +303,8 @@ body {
     min-height: auto;
     align-items: flex-start;
   }
-  #now-playing img {
-    margin-bottom: 8px;
-  }
   .center-info {
     text-align: left;
-    width: 100%;
-    margin: 8px 0;
-  }
-  .controls {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 300px) {
-  #now-playing img {
-    width: 50px;
-    height: 50px;
-  }
-  .song-title {
-    font-size: 0.9rem;
-  }
-  .now-playing-text {
-    font-size: 0.55rem;
-  }
-  .controls button {
-    padding: 3px 6px;
-    font-size: 0.9rem;
+    width: calc(100% - 80px); /* Adjust width to avoid image overlap */
   }
 }
