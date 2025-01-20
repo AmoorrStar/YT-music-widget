@@ -80,7 +80,7 @@ body {
 }
 
 .controls button {
-  background: #222b26;
+  background: #3A8A73;
   color: #202020;
   border: none;
   border-radius: 5px;
@@ -92,7 +92,7 @@ body {
 }
 
 .controls button:hover {
-  background-color: #3A8A73;
+  background-color: #347764;
 }
 
 /* ===== SLIDER ===== */
