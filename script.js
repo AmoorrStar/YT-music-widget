@@ -27,14 +27,13 @@ window.initGoogleAPI = function initGoogleAPI() {
   console.log("initGoogleAPI => gapi is defined, now we load user data & UI");
   loadUserData();
 
-  // Wait until DOM is ready to bind UI
+  // Wait until DOM is ready
   document.addEventListener("DOMContentLoaded", () => {
     initUI();
     // Add keydown listener for F8 => smooth toggle
     document.addEventListener("keydown", (event) => {
-      // F8 key => event.key === "F8"
       if (event.key === "F8") {
-        event.preventDefault(); 
+        event.preventDefault();
         togglePlayPause();
       }
     });
@@ -46,7 +45,7 @@ window.initGoogleAPI = function initGoogleAPI() {
 
 /************************************
  * onYouTubeIframeAPIReady => 
- * Called by the YT script once it's ready
+ * Called once YT is ready
  ************************************/
 window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   console.log("onYouTubeIframeAPIReady => Creating YT player");
@@ -96,7 +95,7 @@ function initUI() {
   const playlistsList = document.getElementById("playlistsList");
   const saveChangesBtn = document.getElementById("saveChangesBtn");
 
-  // If no API key, show modal right away
+  // If no API key, show modal
   if (!userData.apiKey) {
     manageModal.style.display = "flex";
   }
@@ -133,10 +132,8 @@ function initUI() {
 }
 
 /************************************
- * initWidget => 
- * 1) load "client" library
- * 2) gapi.client.init({ apiKey })
- * 3) fetchPlaylistVideos
+ * initWidget => load client library
+ * & fetch playlists
  ************************************/
 function initWidget() {
   if (!userData.apiKey) {
@@ -164,8 +161,7 @@ function initWidget() {
 }
 
 /************************************
- * reloadWidget => re-run initWidget
- * after user changes data
+ * reloadWidget => re-init
  ************************************/
 function reloadWidget() {
   console.log("reloadWidget => re-initialize with new data");
@@ -173,7 +169,7 @@ function reloadWidget() {
 }
 
 /************************************
- * fetchPlaylistVideos => uses gapi client
+ * fetchPlaylistVideos => uses gapi
  ************************************/
 function fetchPlaylistVideos(playlistId) {
   console.log("fetchPlaylistVideos => ID:", playlistId);
@@ -236,7 +232,6 @@ function displayPlaylist(videoList) {
  * onPlayerStateChange
  ************************************/
 function onPlayerStateChange(e) {
-  // Duration in "Playing Now"
   const totalDurationEl = document.getElementById("total-duration");
   if (totalDurationEl && player) {
     const d = player.getDuration() || 0;
@@ -277,8 +272,7 @@ function onPlayerStateChange(e) {
 }
 
 /************************************
- * playVideo => updates header & loads
- * new video
+ * playVideo => updates header
  ************************************/
 function playVideo(videoId, title, thumbnail) {
   const nowPlaying = document.getElementById("now-playing");
@@ -311,8 +305,7 @@ function playVideo(videoId, title, thumbnail) {
 }
 
 /************************************
- * Re-bind the control events 
- * after refreshing the header
+ * Re-bind controls
  ************************************/
 function initUIControls() {
   const manageBtn = document.getElementById("manage-api-button");
