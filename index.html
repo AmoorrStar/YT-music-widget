@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Custom YouTube Playlist Widget</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -19,9 +18,7 @@
       </div>
 
       <div class="controls">
-        <button id="manage-api-button" title="Manage API">
-          <img src="icon-manage-api.png" alt="Manage API" class="icon" />
-        </button>
+        <button id="manage-api-button">⌂</button>
         <button id="loop-button" title="Loop (Off)">↻</button>
         <button id="shuffle-button" title="Shuffle">⇄</button>
         <button id="prev-button" title="Previous Song">|≪</button>
@@ -58,8 +55,13 @@
     </div>
   </div>
 
+  <!-- 1) Our main app logic (defines initGoogleAPI, onYouTubeIframeAPIReady, etc.) -->
   <script src="script.js"></script>
+
+  <!-- 2) The Google API script with ?onload => calls initGoogleAPI() AFTER it loads -->
   <script src="https://apis.google.com/js/api.js?onload=initGoogleAPI"></script>
+
+  <!-- 3) YouTube IFrame API script => calls onYouTubeIframeAPIReady() once loaded -->
   <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
