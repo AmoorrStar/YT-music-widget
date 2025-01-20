@@ -20,21 +20,27 @@ let fadeInterval;
 let player;
 
 /************************************
- * initGoogleAPI() => Called by ?onload=initGoogleAPI 
- * from api.js AFTER gapi is loaded
+ * initGoogleAPI => Called by ?onload
  ************************************/
 window.initGoogleAPI = function initGoogleAPI() {
   console.log("initGoogleAPI => gapi is defined, now we load user data & UI");
   loadUserData();
 
-  // Wait until DOM is ready
   document.addEventListener("DOMContentLoaded", () => {
     initUI();
-    // Add keydown listener for F8 => smooth toggle
+
+    // Add keydown listener for F7 (prev), F8 (toggle), F9 (next)
     document.addEventListener("keydown", (event) => {
-      if (event.key === "F8") {
+      // Prevent default for these function keys to override OS media keys
+      if (event.key === "F7") {
+        event.preventDefault();
+        playPreviousSong();
+      } else if (event.key === "F8") {
         event.preventDefault();
         togglePlayPause();
+      } else if (event.key === "F9") {
+        event.preventDefault();
+        playNextSong();
       }
     });
 
@@ -44,8 +50,7 @@ window.initGoogleAPI = function initGoogleAPI() {
 };
 
 /************************************
- * onYouTubeIframeAPIReady => 
- * Called once YT is ready
+ * onYouTubeIframeAPIReady
  ************************************/
 window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   console.log("onYouTubeIframeAPIReady => Creating YT player");
@@ -65,7 +70,7 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
 };
 
 /************************************
- * Load & Save localStorage
+ * loadUserData / saveUserData
  ************************************/
 function loadUserData() {
   const rawData = localStorage.getItem(STORAGE_KEY);
@@ -83,7 +88,7 @@ function saveUserData() {
 }
 
 /************************************
- * UI for manage modal
+ * initUI => manage modal
  ************************************/
 function initUI() {
   const manageModal = document.getElementById("manage-modal");
@@ -95,7 +100,7 @@ function initUI() {
   const playlistsList = document.getElementById("playlistsList");
   const saveChangesBtn = document.getElementById("saveChangesBtn");
 
-  // If no API key, show modal
+  // If no API key, show modal right away
   if (!userData.apiKey) {
     manageModal.style.display = "flex";
   }
@@ -132,8 +137,7 @@ function initUI() {
 }
 
 /************************************
- * initWidget => load client library
- * & fetch playlists
+ * initWidget => load gapi.client
  ************************************/
 function initWidget() {
   if (!userData.apiKey) {
@@ -160,16 +164,13 @@ function initWidget() {
   });
 }
 
-/************************************
- * reloadWidget => re-init
- ************************************/
 function reloadWidget() {
   console.log("reloadWidget => re-initialize with new data");
   initWidget();
 }
 
 /************************************
- * fetchPlaylistVideos => uses gapi
+ * fetchPlaylistVideos => gapi request
  ************************************/
 function fetchPlaylistVideos(playlistId) {
   console.log("fetchPlaylistVideos => ID:", playlistId);
@@ -229,7 +230,7 @@ function displayPlaylist(videoList) {
 }
 
 /************************************
- * onPlayerStateChange
+ * onPlayerStateChange => track events
  ************************************/
 function onPlayerStateChange(e) {
   const totalDurationEl = document.getElementById("total-duration");
@@ -272,7 +273,7 @@ function onPlayerStateChange(e) {
 }
 
 /************************************
- * playVideo => updates header
+ * playVideo => update header
  ************************************/
 function playVideo(videoId, title, thumbnail) {
   const nowPlaying = document.getElementById("now-playing");
@@ -296,7 +297,7 @@ function playVideo(videoId, title, thumbnail) {
     <div id="slider-tooltip">0:00</div>
   `;
 
-  initUIControls(); // re-bind control events
+  initUIControls(); // re-bind events
 
   if (player && typeof player.loadVideoById === "function") {
     player.setVolume(100);
@@ -399,10 +400,11 @@ function fadeVolume(targetVolume, fadeTime = 1000) {
     if (currentVolume > 100) currentVolume = 100;
     player.setVolume(currentVolume);
 
-    if (
+    const done =
       (volumeStep > 0 && currentVolume >= targetVolume) ||
-      (volumeStep < 0 && currentVolume <= targetVolume)
-    ) {
+      (volumeStep < 0 && currentVolume <= targetVolume);
+
+    if (done) {
       clearInterval(fadeInterval);
       isFading = false;
       player.setVolume(targetVolume);
@@ -416,7 +418,7 @@ function fadeVolume(targetVolume, fadeTime = 1000) {
 }
 
 /************************************
- * togglePlayPause => fade in/out
+ * togglePlayPause => fade
  ************************************/
 function togglePlayPause() {
   if (!player) return;
