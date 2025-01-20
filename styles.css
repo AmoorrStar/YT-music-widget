@@ -302,23 +302,25 @@ body {
   margin-top: 10px;
 }
 
-/* Basic media query for very small screens */
+/* ===== Responsive adjustments ===== */
 @media (max-width: 500px) {
   #now-playing {
     flex-wrap: wrap;
     min-height: auto;
+    align-items: flex-start;
+  }
+  #now-playing img {
+    margin-bottom: 8px;
   }
   .center-info {
-    padding-left: 0;
-    text-align: center;
+    padding-left: 10px;
+    text-align: left;
     width: 100%;
-    margin-bottom: 10px;
+    margin: 8px 0;
   }
   .controls {
     width: 100%;
     justify-content: center;
-  }
-  #now-playing img {
-    margin-bottom: 8px;
+    margin-top: auto;
   }
 }
